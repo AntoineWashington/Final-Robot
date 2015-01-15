@@ -13,6 +13,8 @@
 #endif
 
 Servo right;
+Servo left;
+Servo comb;
 
 USB Usb;
 XBOXRECV Xbox(&Usb);
@@ -25,9 +27,11 @@ void setup() {
     while (1); //halt
   }
   Serial.print(F("\r\nXbox Wireless Receiver Library Started"));
-  right.attach(9);
+  right.attach(10);
+  left.attach(11);
+  comb.attach(12);
 }
-void loop() {
+void loop() { 
   Usb.Task();
   if (Xbox.XboxReceiverConnected) {
     for (uint8_t i = 0; i < 4; i++) {
@@ -46,10 +50,13 @@ void loop() {
             Serial.print(Xbox.getAnalogHat(LeftHatX, i));
             Serial.print("\t");
           }
-          if (Xbox.getAnalogHat(LeftHatY, i) > 7500 || Xbox.getAnalogHat(LeftHatY, i) < -7500) {
+          if (Xbox.getAnalogHat(LeftHatY, i) > 7500){
+            //          Xbox.getAnalogHat(LeftHatY, i) < -7500) {
             Serial.print(F("LeftHatY: "));
             Serial.print(Xbox.getAnalogHat(LeftHatY, i));
             Serial.print("\t");
+            right.write(0);
+            left.write(180);
           }
           if (Xbox.getAnalogHat(RightHatX, i) > 7500 || Xbox.getAnalogHat(RightHatX, i) < -7500) {
             Serial.print(F("RightHatX: "));
@@ -90,7 +97,7 @@ void loop() {
         }
         if (Xbox.getButtonClick(L3, i))
           Serial.println(F("L3"));
-        
+
         if (Xbox.getButtonClick(R3, i))
           Serial.println(F("R3"));
 
@@ -111,6 +118,7 @@ void loop() {
 
         if (Xbox.getButtonClick(A, i))
           Serial.println(F("A"));
+          comb.write(90);
         if (Xbox.getButtonClick(B, i))
           Serial.println(F("B"));
         if (Xbox.getButtonClick(X, i))
@@ -121,3 +129,4 @@ void loop() {
     }
   }
 }
+
