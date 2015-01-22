@@ -14,7 +14,6 @@
 
 Servo right;
 Servo left;
-Servo comb;
 
 USB Usb;
 XBOXRECV Xbox(&Usb);
@@ -27,11 +26,11 @@ void setup() {
     while (1); //halt
   }
   Serial.print(F("\r\nXbox Wireless Receiver Library Started"));
-  right.attach(10);
-  left.attach(11);
-  comb.attach(12);
+  right.attach(9);
+  left.attach(10);
+  pinMode(12, OUTPUT);
 }
-void loop() { 
+void loop() {
   Usb.Task();
   if (Xbox.XboxReceiverConnected) {
     for (uint8_t i = 0; i < 4; i++) {
@@ -50,17 +49,10 @@ void loop() {
             Serial.print(Xbox.getAnalogHat(LeftHatX, i));
             Serial.print("\t");
           }
-          if (Xbox.getAnalogHat(LeftHatY, i) > 7500){
+          if (Xbox.getAnalogHat(LeftHatY, i) > 7500 || Xbox.getAnalogHat(LeftHatY, i) < -7500) {
             Serial.print(F("LeftHatY: "));
             Serial.print(Xbox.getAnalogHat(LeftHatY, i));
             Serial.print("\t");
-            right.write(0);
-            left.write(180);
-          }
-          if (Xbox.getAnalogHat(LeftHatY, i) < -7500) {
-            right.write(180);
-            left.write(0);
-            Serial.print("heyyyyy");
           }
           if (Xbox.getAnalogHat(RightHatX, i) > 7500 || Xbox.getAnalogHat(RightHatX, i) < -7500) {
             Serial.print(F("RightHatX: "));
@@ -74,21 +66,29 @@ void loop() {
           Serial.println();
         }
         //D-PAD//////////////////////////
-        if (Xbox.getButtonClick(UP, i)) {
-          Xbox.setLedOn(LED1, i);
+        if (Xbox.getButtonClick(UP, i)) {    ////left full forward is 180
+          Xbox.setLedOn(LED1, i);            ///right "            " 90
           Serial.println(F("Up"));
+          right.write(180);
+          left.write(0);
         }
         if (Xbox.getButtonClick(DOWN, i)) {
           Xbox.setLedOn(LED4, i);
           Serial.println(F("Down"));
+          right.write(0);
+          left.write(180);
         }
         if (Xbox.getButtonClick(LEFT, i)) {
           Xbox.setLedOn(LED3, i);
-          Serial.println(F("Left"));
+          Serial.print(F("Left"));
+          right.write(180);
+          left.write(90);
         }
         if (Xbox.getButtonClick(RIGHT, i)) {
           Xbox.setLedOn(LED2, i);
           Serial.println(F("Right"));
+          right.write(90);
+          left.write(0);
         }
 
         if (Xbox.getButtonClick(START, i)) {
@@ -101,7 +101,7 @@ void loop() {
         }
         if (Xbox.getButtonClick(L3, i))
           Serial.println(F("L3"));
-
+        
         if (Xbox.getButtonClick(R3, i))
           Serial.println(F("R3"));
 
@@ -120,11 +120,17 @@ void loop() {
           Xbox.disconnect(i);
         }
 
-        if (Xbox.getButtonClick(A, i))
+        if (Xbox.getButtonClick(A, i)){
           Serial.println(F("A"));
-          comb.write(90);
-        if (Xbox.getButtonClick(B, i))
+          digitalWrite(12, HIGH);
+        }
+        else{
+          digitalWrite(12,LOW);
+        }
+        if (Xbox.getButtonClick(B, i)){
           Serial.println(F("B"));
+          right.write(180);
+        }
         if (Xbox.getButtonClick(X, i))
           Serial.println(F("X"));
         if (Xbox.getButtonClick(Y, i))
